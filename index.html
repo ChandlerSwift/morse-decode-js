@@ -9,6 +9,9 @@
       div.section {
         padding-bottom: 10px;
       }
+      #output-wrapper {
+	display: none;
+      }
     </style>
   </head>
   <body>
@@ -17,10 +20,47 @@
 	<button id="morse-btn">Morse me!</button>
 	<button id="finish-btn">Finish</button>
       </div>
-      <div class="section">
-	<b>Output:</b> <span id="output">asdf</span>
+      <div class="section" id="output-wrapper">
+	<b>Output:</b> <span id="output"></span>
       </div>
     </div>
+    <script>
+      var clicks;
+      var lastClickStart;
+      var lastClickEnd;
+
+      function initialize() {
+        clicks = [];
+        lastClickStart = null;
+        lastClickEnd = null;
+      }
+
+      initialize();
+      
+      document.getElementById("morse-btn").onmousedown = function() {
+        if (lastClickEnd != null) // There was a previous click, so record off time that just ended
+          clicks.push({type: "off", time: lastClickEnd, duration: Date.now()-lastClickEnd});
+        lastClickStart = Date.now();
+      }
+
+      document.getElementById("morse-btn").onmouseup = function() {
+        clicks.push({type: "on", time: lastClickStart, duration: Date.now()-lastClickStart});
+        lastClickEnd = Date.now();
+      };
+
+      document.getElementById("finish-btn").onclick = function() {
+        var onTimes = clicks.filter(function(a) { return a.type === "on" }).map(function(a) { return a.duration });
+        var offTimes = clicks.filter(function(a) { return a.type === "off" }).map (function(a) { return a.duration});
+        console.log("onTimes:");
+        console.log(onTimes);
+        console.log("offTimes:");
+        console.log(offTimes);
+        console.log(JSON.stringify(clicks, null, 4));
+        document.getElementById("output-wrapper").style.display="initial"; // Unhide element
+        document.getElementById("output").innerHTML = "sos (presumably)";
+        initialize();
+      }
+    </script>
   </body>
 </html>
-  
+
