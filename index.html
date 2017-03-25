@@ -34,6 +34,8 @@
       </div>
     </div>
     <script>
+      var morseAlphabet = ['.-', '-...', '-.-.', '-..', '.', '..-.', '--.', '....', '..', '.---', '-.-','.-..', '--', '-.',
+                           '---', '.--.', '--.-', '.-.', '...', '-', '..-', '...-', '.--', '-..-', '-.--', '--..', '.-.-.-'];
       var clicks;
       var lastClickStart;
       var lastClickEnd;
@@ -58,6 +60,7 @@
       };
 
       document.getElementById("finish-btn").onclick = function() {
+        clicks.push({type: "off", time: 0, duration: 1000}); // This is here so that the final letter gets processed.
         var onTimes = clicks.filter(function(a) { return a.type === "on" }).map(function(a) { return a.duration });
         var offTimes = clicks.filter(function(a) { return a.type === "off" }).map (function(a) { return a.duration});
         console.log("onTimes:");
@@ -65,8 +68,22 @@
         console.log("offTimes:");
         console.log(offTimes);
         console.log(JSON.stringify(clicks, null, 4));
+
+        message = "";
+        letter = "";
+        // Process letters
+        clicks.forEach(function(click){
+          if (click.type == "on") {
+            letter += (click.duration > 300) ? "-" : ".";
+          } else if (click.type == "off" && click.duration > 700) { // End of letter
+            console.log(letter);
+            message += String.fromCharCode(65 + morseAlphabet.indexOf(letter));
+            letter = "";
+          }
+        });
+
         document.getElementById("output-wrapper").style.display="initial"; // Unhide element
-        document.getElementById("output").innerHTML = "sos (presumably)";
+        document.getElementById("output").innerHTML = message;
         initialize();
       }
     </script>
